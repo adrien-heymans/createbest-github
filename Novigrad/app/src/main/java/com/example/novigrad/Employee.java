@@ -1,3 +1,5 @@
+//simple class to represent an employee
+
 package com.example.novigrad;
 
 public class Employee{
@@ -20,7 +22,7 @@ public class Employee{
 
     }
 
-    //get methods 
+    //getters
 
     public String getFName(){
         return this.fname;
@@ -40,6 +42,8 @@ public class Employee{
     public String getEmail(){
         return this.email;
     }
+
+    //setters
 
     public void setFName(String n){
         this.fname = n;

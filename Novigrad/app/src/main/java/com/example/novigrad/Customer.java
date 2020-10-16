@@ -1,3 +1,7 @@
+//simple class to represent a customer
+
+
+
 package com.example.novigrad;
 public class Customer{
 
@@ -7,6 +11,7 @@ public class Customer{
     private String password;
     private String phone;
     private String type;
+
 
 
     public Customer (String fname,String lname, String phone,String email,String password){
@@ -19,7 +24,7 @@ public class Customer{
 
     }
 
-    //get methods 
+    //getters
 
     public String getFName(){
         return this.fname;
@@ -39,6 +44,8 @@ public class Customer{
     public String getEmail(){
         return this.email;
     }
+
+    //setters
 
     public void setFName(String n){
         this.fname = n;

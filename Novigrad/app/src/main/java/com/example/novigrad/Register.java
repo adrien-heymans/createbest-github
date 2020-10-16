@@ -34,6 +34,8 @@ import java.util.Map;
 
 public class Register extends AppCompatActivity {
 
+    //instance variables needed, they are presents on the design
+
     EditText mFirstName,mLastName,mEmail,mPassword,mPhoneNumber;
     Button register;
     TextView mLoginBtn;
@@ -41,13 +43,15 @@ public class Register extends AppCompatActivity {
     FirebaseAuth fAuth;
     FirebaseFirestore fStore;
     String userID;
+
+    //initialising the drop down list where the user chose betweem user and employee
     String[] types = {"User","Employee"};
     Employee emp;
     Customer cust;
+
+    //datastructure to store emplopyees and customers locally
     HashMap<String,Employee> employees = new HashMap<>();
     HashMap<String,Customer> customers = new HashMap<>();
-
-
 
 
 
@@ -57,7 +61,7 @@ public class Register extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-
+        //retrieving the elements of the design, connecting buttons, texview,etc
         mFirstName = findViewById(R.id.firstName);
         mLastName = findViewById(R.id.lastName);
         mPhoneNumber = findViewById(R.id.phoneNumber);
@@ -78,11 +82,12 @@ public class Register extends AppCompatActivity {
 
 
 
-
+        //Firebase variable , the first one is used for authentication, the second one to store the data of the user on the Clours Firestore
 
         fAuth = FirebaseAuth.getInstance();
         fStore = FirebaseFirestore.getInstance();
 
+        //sending the user to the new activity when they don;t have an account
         mLoginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -91,9 +96,14 @@ public class Register extends AppCompatActivity {
             }
         });
 
+
+        //if the user clicks on register we will create a new user
         register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                //getting all the Strings entered by the user in the form
+
                 final String email = mEmail.getText().toString().trim();
                 final String password = mPassword.getText().toString().trim();
                 final String fname = mFirstName.getText().toString();
@@ -103,6 +113,7 @@ public class Register extends AppCompatActivity {
 
 
 
+                //checking if the entries are valid for emails and password
 
                 if(TextUtils.isEmpty(email)){
                     mEmail.setError("Email is Required.");
@@ -113,29 +124,31 @@ public class Register extends AppCompatActivity {
                     mPassword.setError("Password is required.");
                     return;
                 }
+
+                //the length of tha password needs to be at least 6
                 if(password.length()<6){
                     mPassword.setError("Password must be more than 6 characters");
                     return;
                 }
 
+                //a simple progress bar that is turned on between the time the user clicks on register and the moment he is sent to the welcome page
                 progressBar.setVisibility(View.VISIBLE);
 
-                //register the user
 
 
+
+                //firebase function taht will create a new user using its name and password (the one entered in the form)
 
                 fAuth.createUserWithEmailAndPassword(email,password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
 
-                        System.out.println("here 1");
+
                         if(task.isSuccessful()){
                             Toast.makeText(Register.this,"User created",Toast.LENGTH_SHORT);
-                            System.out.println("here 2");
+
                             //we add the data of the new user to the database
                             userID = fAuth.getCurrentUser().getUid();
-
-                            System.out.println("here 3");
 
                             DocumentReference documentReference = fStore.collection("users").document(userID);
 
@@ -143,7 +156,6 @@ public class Register extends AppCompatActivity {
                             Map<String,Object> user = new HashMap<>();
 
                             //here we add the new user or employee to the firebase database
-
                             System.out.println("Creating new user");
                             user.put("firstName",fname);
                             user.put("lastname",lname);
@@ -152,7 +164,7 @@ public class Register extends AppCompatActivity {
                             user.put("password",password);
                             user.put("type",type);
 
-                            //we also need to add the employee or customer in their respective hasmap, it will be useful in the future
+                            //we also need to add the employee or customer in their respective hashmap, it will be useful in the future
 
                             if (type=="Employee"){
                                 employees.put(phone,new Employee(fname,lname,phone,email,password));
@@ -161,29 +173,36 @@ public class Register extends AppCompatActivity {
                                 customers.put(phone,new Customer(fname,lname,phone,email,password));
                             }
 
-                            //the new entity has been added both locally and on the online databse
+                            //the new entity has been added both locally and on the online database
 
 
-                            System.out.println("Creating here");
+
                             documentReference.set(user).addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
+
+                                //we are printing the succes in the consol
                                 public void onSuccess(Void aVoid) {
                                     Log.d("TAG","onSuccess : user Profile is created for "+ userID);
 
                                 }
                             }).addOnFailureListener(new OnFailureListener() {
+                                //we are printing the failure if applicable in the console
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
                                     Log.d("TAG","onFailure : "+e.toString());
                                 }
                             });
 
-
+                            //sending the user the the welcome page
                             startActivity(new Intent(getApplicationContext(),MainActivity.class));
 
                         }else{
+
+                            //if the task is not succesfull we print on the console that an error was found
                             System.out.println("error whe  creating user");
                             Toast.makeText(Register.this,"Error !" + task.getException().getLocalizedMessage(),Toast.LENGTH_SHORT);
+
+                            //we hide the progress bar
                             progressBar.setVisibility(View.GONE);
 
 
